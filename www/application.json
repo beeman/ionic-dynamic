@@ -1,0 +1,48 @@
+{
+    "appName": "ionic-dynamic",
+    "menuItems": [
+        {
+            "href": "#/app/dashboard",
+            "label": "Dashboard"
+        },
+        {
+            "href": "#/app/settings",
+            "label": "Settings"
+        },
+        {
+            "href": "#/app/about",
+            "label": "About"
+        },
+        {
+            "href": "#/app/sandbox",
+            "label": "Sandbox"
+        }
+    ],
+    "states": [
+        {
+            "state": "app.dashboard",
+            "url": "/dashboard",
+            "templateUrl": "templates/dashboard.html",
+            "controller": "DashboardCtrl",
+            "defaultState": true
+        },
+        {
+            "state": "app.settings",
+            "url": "/settings",
+            "templateUrl": "templates/page.html",
+            "controller": "SettingsCtrl"
+        },
+        {
+            "state": "app.about",
+            "url": "/about",
+            "templateUrl": "templates/page.html",
+            "controller": "AboutCtrl"
+        },
+        {
+            "state": "app.sandbox",
+            "url": "/sandbox",
+            "templateUrl": "templates/page.html",
+            "controller": "SandboxCtrl"
+        }
+    ]
+}

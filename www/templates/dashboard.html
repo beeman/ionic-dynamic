@@ -1,0 +1,15 @@
+<ion-view title="{{pageTitle}}">
+    <ion-nav-buttons side="left">
+        <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+    </ion-nav-buttons>
+    <ion-content class="has-header padding">
+
+        <a nav-clear class="button button-block button-stable" ng-repeat="item in menuItems" href="{{item.href}}" ng-if="item.label != 'Dashboard'">
+            {{item.label}}
+        </a>
+
+        <button nav-clear class="button button-block button-stable" ng-click="init()">
+            Initialize application
+        </button>
+    </ion-content>
+</ion-view>
