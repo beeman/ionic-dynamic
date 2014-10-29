@@ -42,35 +42,52 @@ app.config(function ($stateProvider, $urlRouterProvider) {
  */
 app.baseConfig = false;
 
+/**
+ * This controllers reads the configuration and adds the states
+ */
 app.controller('InitCtrl', function ($scope, $state, $timeout, $ionicViewService, config) {
+    $scope.startLoading();
 
     $ionicViewService.nextViewOptions({
         disableAnimate: true,
         disableBack: true
     });
 
-    var getExistingStates = function () {
-        var existingStates = $state.get();
+    var existingStates = [];
 
-        var existing = [];
-
-        for (var idx in existingStates) {
-            var currentState = existingStates[idx];
-            existing.push(currentState.name)
+    var addStates = function (states) {
+        existingStates = getExistingStates();
+        for (var idx in states) {
+            addState(states[idx]);
         }
-        return existing;
     };
 
+    var getExistingStates = function () {
+        var states = $state.get();
+        var result = [];
+        for (var idx in states) {
+            result.push(states[idx].name)
+        }
+        return result;
+    };
+
+    var stateExist = function (state) {
+        return existingStates.indexOf(state) !== -1;
+    };
+
+    var setDefaultState = function (state) {
+        // Store defaultState in defaultStateSafe as it gets overwritten while re-initializing
+        app.baseConfig.defaultState = app.defaultStateSafe = state.state;
+        app.urlRouterProvider.otherwise(state.state);
+    };
 
     var addState = function (state) {
-        var existing = getExistingStates();
-
         app.baseConfig.defaultState = app.defaultStateSafe;
 
-        if(existing.indexOf(state.state) === -1) {
+        // Only add states that are not there yet
+        if (!stateExist(state.state)) {
             if (state.defaultState) {
-                app.baseConfig.defaultState = app.defaultStateSafe = state.state;
-                app.urlRouterProvider.otherwise(state.state);
+                setDefaultState(state);
             }
             app.stateProvider.state(state.state, {
                 url: state.url,
@@ -82,31 +99,60 @@ app.controller('InitCtrl', function ($scope, $state, $timeout, $ionicViewService
                 }
             });
         }
-
     };
 
-    $scope.message = "Loading...";
+    $timeout(function () {
 
-    $timeout(function() {
-
+        // Read the configuration
         config.config().then(function (response) {
 
+            // Set the baseConfig
+            app.baseConfig = response.data;
 
-            $scope.config = app.baseConfig = response.data;
+            // Add the states
+            addStates(app.baseConfig.states);
 
-            console.log('Add states');
-            for (var idx in app.baseConfig.states) {
-                addState(app.baseConfig.states[idx]);
-            }
-
-            console.log('done');
-            console.log(app.baseConfig.defaultState);
+            // Go to the default state
             $state.go(app.baseConfig.defaultState, {}, {location: true})
-
         });
 
+    }, 1000);
 
-    }, 1500);
+});
 
+/**
+ * The AppCtrl takes care of the parent view for all the other views
+ * It is defined in one of the two static states in this application
+ */
+app.controller('AppCtrl', function ($scope, $state, $ionicViewService) {
+    $scope.stopLoading();
 
+    $ionicViewService.nextViewOptions({
+        disableAnimate: true,
+        disableBack: true
+    });
+
+    $scope.appName = app.baseConfig.appName;
+    $scope.menuItems = app.baseConfig.menuItems;
+
+});
+
+/**
+ * The LayoutCtrl is attached to the body
+ */
+app.controller('LayoutCtrl', function ($scope, $state, $ionicLoading) {
+    $scope.init = function () {
+        $state.go('init', true);
+    };
+    $scope.defaultState = function () {
+        $state.go(app.baseConfig.defaultState, true);
+    };
+    $scope.startLoading = function () {
+        $ionicLoading.show({
+            template: 'Loading...'
+        });
+    };
+    $scope.stopLoading = function () {
+        $ionicLoading.hide();
+    };
 });
